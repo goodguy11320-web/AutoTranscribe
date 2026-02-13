@@ -2,6 +2,7 @@
 FunASR 转录引擎 — 语言检测 + ASR + 说话人分离。
 
 模型采用懒加载策略：首次使用时加载，之后常驻内存以加速后续转录。
+长音频优化：语言检测仅使用前 60 秒，ASR 依赖内置 VAD 自动分段。
 """
 
 import logging
@@ -13,6 +14,9 @@ from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+# 语言检测采样时长（秒）：只取前 N 秒用于语言检测，大幅降低内存和时间
+LID_SAMPLE_SECONDS = 60
 
 # 全局模型缓存 + 锁
 _models: dict = {}
@@ -96,15 +100,47 @@ def _load_model(key: str):
         return model
 
 
+def _extract_audio_clip(audio_path: Path, max_seconds: int = LID_SAMPLE_SECONDS) -> Path:
+    """
+    从音频文件中提取前 N 秒，用于语言检测。
+    对短音频（<= max_seconds）直接返回原路径。
+    """
+    duration = _get_audio_duration(str(audio_path))
+    if duration <= max_seconds:
+        logger.info(f"音频 {duration:.0f}s <= {max_seconds}s，无需截取")
+        return audio_path
+
+    clip_path = Path(tempfile.mktemp(suffix="_lid_clip.wav"))
+    logger.info(f"截取前 {max_seconds}s 用于语言检测 (总时长 {duration:.0f}s)")
+    cmd = [
+        "ffmpeg", "-y", "-i", str(audio_path),
+        "-t", str(max_seconds),
+        "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
+        str(clip_path),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    if result.returncode != 0:
+        logger.warning(f"截取音频失败，将使用完整音频: {result.stderr[-200:]}")
+        return audio_path
+    return clip_path
+
+
 def detect_language(audio_path: Path) -> str:
     """
     使用 SenseVoice 检测音频语言。
     返回 'zh'、'en' 或 'en_cn'（中英混合）。默认 'zh'。
+
+    优化：对长音频仅使用前 60 秒做检测，大幅降低内存和耗时。
     """
     logger.info("检测语言...")
+    clip_path = None
     try:
+        # 对长音频只取前 60 秒做语言检测
+        clip_path = _extract_audio_clip(audio_path)
+        is_clip = (clip_path != audio_path)
+
         model = _load_model("lid")
-        result = model.generate(input=str(audio_path), language="auto")
+        result = model.generate(input=str(clip_path), language="auto")
 
         if result and len(result) > 0:
             text = str(result[0].get("text", ""))
@@ -143,6 +179,13 @@ def detect_language(audio_path: Path) -> str:
     except Exception as e:
         logger.error(f"语言检测失败: {e}，默认使用中文")
         return "zh"
+    finally:
+        # 清理截取的临时文件
+        if clip_path and clip_path != audio_path and clip_path.exists():
+            try:
+                clip_path.unlink()
+            except Exception:
+                pass
 
 
 def transcribe(video_path: Path) -> dict:

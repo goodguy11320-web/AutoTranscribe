@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoTranscribe Monitor</title>
+    <style>
+      :root {
+        --bg-color: #1a1b26;
+        --card-bg: rgba(30, 32, 48, 0.7);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --text-primary: #a9b1d6;
+        --text-secondary: #787c99;
+        --accent: #7aa2f7;
+        --accent-glow: rgba(122, 162, 247, 0.3);
+        --success: #9ece6a;
+        --warning: #e0af68;
+        --error: #f7768e;
+        --font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: var(--font-family);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+        background-image:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(122, 162, 247, 0.1) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(158, 206, 106, 0.1) 0%,
+            transparent 20%
+          );
+      }
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        background-color: var(--text-secondary);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s;
+      }
+
+      .status-dot.active {
+        background-color: var(--success);
+        box-shadow: 0 0 15px var(--success);
+      }
+
+      /* Glassmorphism Card */
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+
+      /* Current Task Section */
+      .task-info {
+        margin-bottom: 20px;
+      }
+
+      .task-filename {
+        font-size: 18px;
+        color: #fff;
+        margin-bottom: 8px;
+        word-break: break-all;
+      }
+
+      .task-detail {
+        font-size: 14px;
+        color: var(--accent);
+        margin-bottom: 20px;
+      }
+
+      .progress-container {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: var(--accent);
+        width: 0%;
+        border-radius: 4px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 0 12px var(--accent-glow);
+      }
+
+      .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transform: translateX(-100%);
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .progress-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      /* Queue & History Lists */
+      .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .list-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .list-item:first-child {
+        padding-top: 0;
+      }
+
+      .item-name {
+        color: var(--text-primary);
+        font-size: 14px;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 16px;
+      }
+
+      .item-meta {
+        font-size: 12px;
+        color: var(--text-secondary);
+        min-width: 80px;
+        text-align: right;
+      }
+
+      .tag {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .tag.success {
+        background: rgba(158, 206, 106, 0.2);
+        color: var(--success);
+      }
+      .tag.fail {
+        background: rgba(247, 118, 142, 0.2);
+        color: var(--error);
+      }
+      .tag.wait {
+        background: rgba(224, 175, 104, 0.2);
+        color: var(--warning);
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 14px;
+        padding: 20px 0;
+        font-style: italic;
+      }
+
+      /* Idle State */
+      .idle-banner {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--text-secondary);
+      }
+
+      .idle-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>
+          <span id="service-status" class="status-dot"></span>
+          AutoTranscribe Monitor
+        </h1>
+      </header>
+
+      <!-- Current Task Card -->
+      <div class="card" id="current-task-card">
+        <div class="card-header">Current Task</div>
+        <div id="active-task-content">
+          <div class="task-info">
+            <div class="task-filename" id="current-filename">Loading...</div>
+            <div class="task-detail" id="current-stage">Initializing...</div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+          <div class="progress-stats">
+            <span id="progress-pct">0%</span>
+            <span id="progress-time">0m0s</span>
+          </div>
+        </div>
+
+        <div id="idle-content" style="display: none">
+          <div class="idle-banner">
+            <div class="idle-icon">💤</div>
+            <p>No active transcription task</p>
+            <p style="font-size: 12px; margin-top: 8px">
+              Waiting for video files in Desktop or Downloads...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Queue Card -->
+      <div class="card">
+        <div class="card-header">
+          Queue
+          <span id="queue-count" style="font-size: 12px; opacity: 0.7"
+            >(0)</span
+          >
+        </div>
+        <div id="queue-list">
+          <div class="empty-state">Queue is empty</div>
+        </div>
+      </div>
+
+      <!-- History Card -->
+      <div class="card">
+        <div class="card-header">Recent History</div>
+        <div id="history-list">
+          <!-- Items injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "/api/status";
+      let lastState = null;
+
+      async function updateDashboard() {
+        try {
+          const response = await fetch(API_URL);
+          const data = await response.json();
+
+          // Update Service Status Dot
+          const now = new Date();
+          document.getElementById("service-status").classList.add("active");
+
+          // 1. Update Current Task
+          const isIdle = data.state === "idle";
+          const activeContent = document.getElementById("active-task-content");
+          const idleContent = document.getElementById("idle-content");
+
+          if (isIdle) {
+            activeContent.style.display = "none";
+            idleContent.style.display = "block";
+            document.title = "Idle - AutoTranscribe";
+          } else {
+            activeContent.style.display = "block";
+            idleContent.style.display = "none";
+
+            document.getElementById("current-filename").innerText =
+              data.filename;
+            document.getElementById("current-stage").innerText =
+              `${data.state_label} ${data.detail ? "- " + data.detail : ""}`;
+            document.getElementById("progress-bar").style.width =
+              `${data.progress}%`;
+            document.getElementById("progress-pct").innerText =
+              `${data.progress}%`;
+            document.getElementById("progress-time").innerText = data.elapsed;
+
+            document.title = `${data.progress}% ${data.filename} - AutoTranscribe`;
+          }
+
+          // 2. Update Queue
+          const queueList = document.getElementById("queue-list");
+          const queueCount = document.getElementById("queue-count");
+          const queue = data.queue || [];
+
+          queueCount.innerText = `(${queue.length})`;
+
+          if (queue.length === 0) {
+            queueList.innerHTML =
+              '<div class="empty-state">Queue is empty</div>';
+          } else {
+            queueList.innerHTML = queue
+              .map(
+                (item) => `
+                    <div class="list-item">
+                        <span class="item-name">${item.filename}</span>
+                        <div class="item-meta">
+                            <span class="tag wait">WAITING</span>
+                            <span style="margin-left: 8px;">${item.filesize_mb} MB</span>
+                        </div>
+                    </div>
+                `,
+              )
+              .join("");
+          }
+
+          // 3. Update History
+          const historyList = document.getElementById("history-list");
+          const history = data.history || [];
+
+          if (history.length === 0) {
+            historyList.innerHTML =
+              '<div class="empty-state">No recent history</div>';
+          } else {
+            historyList.innerHTML = history
+              .slice()
+              .reverse()
+              .map((item) => {
+                const isSuccess = item.result === "✅";
+                const tagClass = isSuccess ? "success" : "fail";
+                const tagText = isSuccess ? "DONE" : "FAILED";
+
+                return `
+                    <div class="list-item">
+                        <span class="item-name" title="${item.time}">
+                            ${item.file}
+                        </span>
+                        <div class="item-meta">
+                            <span class="tag ${tagClass}">${tagText}</span>
+                            <span style="margin-left: 8px;">${item.elapsed}</span>
+                        </div>
+                    </div>
+                `;
+              })
+              .join("");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          document.getElementById("service-status").classList.remove("active");
+          document.getElementById("current-stage").innerText =
+            "Connection lost...";
+        }
+      }
+
+      // Update every 2 seconds
+      setInterval(updateDashboard, 2000);
+      updateDashboard(); // Initial call
+    </script>
+  </body>
+</html>

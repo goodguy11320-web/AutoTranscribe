@@ -25,6 +25,22 @@ echo "  📝 转录文稿: ${TXT_COUNT}"
 echo "  ❌ 失败文件: ${FAIL_COUNT}"
 echo ""
 
+# 当前转录进度
+STATUS_FILE="${SCRIPT_DIR}/logs/status.json"
+if [ -f "$STATUS_FILE" ]; then
+    STATE=$(python3 -c "import json; d=json.load(open('$STATUS_FILE')); print(d.get('state',''))" 2>/dev/null)
+    if [ -n "$STATE" ] && [ "$STATE" != "idle" ]; then
+        LABEL=$(python3 -c "import json; d=json.load(open('$STATUS_FILE')); print(d.get('state_label',''))" 2>/dev/null)
+        FNAME=$(python3 -c "import json; d=json.load(open('$STATUS_FILE')); print(d.get('filename',''))" 2>/dev/null)
+        PCT=$(python3 -c "import json; d=json.load(open('$STATUS_FILE')); print(d.get('progress',0))" 2>/dev/null)
+        ELAPSED=$(python3 -c "import json; d=json.load(open('$STATUS_FILE')); print(d.get('elapsed',''))" 2>/dev/null)
+        echo "  🔄 当前任务: ${LABEL}"
+        echo "  📄 文件: ${FNAME}"
+        echo "  📊 进度: ${PCT}%  ⏳ 已用: ${ELAPSED}"
+        echo ""
+    fi
+fi
+
 # 最近5条日志
 LOG="${SCRIPT_DIR}/logs/transcribe.log"
 if [ -f "$LOG" ]; then
@@ -33,6 +49,7 @@ if [ -f "$LOG" ]; then
     tail -5 "$LOG" | sed 's/^/  /'
     echo ""
     echo "  💡 完整日志: tail -f ${LOG}"
+    echo "  💡 实时监控: bash monitor.sh"
 fi
 
 echo ""
