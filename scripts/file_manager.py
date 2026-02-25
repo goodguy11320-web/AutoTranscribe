@@ -75,7 +75,7 @@ def generate_standard_name(lang: str, date: Optional[datetime] = None) -> str:
 
 
 def move_video(src: Path, standard_name: str, success: bool) -> Path:
-    """移动视频到 video/ 并重命名。"""
+    """移动输入文件到 video/ 并重命名。"""
     ext = src.suffix
     if success:
         dest_name = f"{standard_name}{ext}"
@@ -93,7 +93,7 @@ def move_video(src: Path, standard_name: str, success: bool) -> Path:
         counter += 1
 
     shutil.move(str(src), str(dest))
-    logger.info(f"视频已移动: {src.name} → {dest.name}")
+    logger.info(f"输入文件已移动: {src.name} → {dest.name}")
     return dest
 
 

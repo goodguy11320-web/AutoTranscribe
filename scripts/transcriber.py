@@ -41,14 +41,14 @@ def _get_audio_duration(audio_path: str) -> float:
         return 0.0
 
 
-def extract_audio(video_path: Path, output_path: Optional[Path] = None) -> Path:
-    """从视频中提取 16kHz 单声道 WAV 音频。"""
+def extract_audio(input_path: Path, output_path: Optional[Path] = None) -> Path:
+    """从输入音视频文件提取 16kHz 单声道 WAV 音频。"""
     if output_path is None:
         output_path = Path(tempfile.mktemp(suffix=".wav"))
 
-    logger.info(f"提取音频: {video_path.name} → {output_path.name}")
+    logger.info(f"提取音频: {input_path.name} → {output_path.name}")
     cmd = [
-        "ffmpeg", "-y", "-i", str(video_path),
+        "ffmpeg", "-y", "-i", str(input_path),
         "-vn",                  # 不要视频
         "-acodec", "pcm_s16le", # 16-bit PCM
         "-ar", "16000",         # 16kHz
@@ -188,7 +188,7 @@ def detect_language(audio_path: Path) -> str:
                 pass
 
 
-def transcribe(video_path: Path) -> dict:
+def transcribe(input_path: Path) -> dict:
     """
     完整转录流程：提取音频 → 语言检测 → ASR + 说话人分离。
 
@@ -205,7 +205,7 @@ def transcribe(video_path: Path) -> dict:
     audio_path = None
     try:
         # 1. 提取音频
-        audio_path = extract_audio(video_path)
+        audio_path = extract_audio(input_path)
         duration = _get_audio_duration(str(audio_path))
         logger.info(f"音频时长: {duration:.1f}s")
 

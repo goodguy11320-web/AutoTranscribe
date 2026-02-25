@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
 </p>
 
-**AutoTranscribe** is a fully automated, offline video transcription system for macOS. It monitors your Desktop and Downloads for new video files, prompts for confirmation, then automatically transcribes audio with speaker diarization — all running locally with zero cloud costs.
+**AutoTranscribe** is a fully automated, offline audio/video transcription system for macOS. It monitors your Desktop and Downloads for new media files, prompts for confirmation, then automatically transcribes audio with speaker diarization — all running locally with zero cloud costs.
 
 ---
 
@@ -59,7 +59,7 @@ That's it! The installer will:
 
 ### Usage
 
-**Just save a video file to your Desktop or Downloads.** A dialog will appear:
+**Just save an audio/video file to your Desktop or Downloads.** A dialog will appear:
 
 1. 📋 **Confirm** — Click "转录" to start, or "跳过" to skip
 2. ⏳ **Progress** — Notification center shows 4 stages (extract → detect → transcribe → save)
@@ -97,7 +97,7 @@ AutoTranscribe/
 │   └── update.py          # Weekly model & dependency updater
 ├── install.sh             # One-click installer
 ├── start.sh / stop.sh / status.sh
-├── video/                 # (gitignored) Processed videos
+├── video/                 # (gitignored) Processed audio/video source files
 ├── txt/                   # (gitignored) Transcription output
 └── logs/                  # (gitignored) Runtime logs
 ```
@@ -122,7 +122,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 # 🎙 AutoTranscribe — 中文说明
 
-**AutoTranscribe** 是一个全自动的本地视频转录系统，专为 macOS 设计。它监控桌面和下载文件夹中的新视频文件，弹窗确认后自动完成语音转文字和说话人分离，全程本地运行，零云端费用。
+**AutoTranscribe** 是一个全自动的本地音视频转录系统，专为 macOS 设计。它监控桌面和下载文件夹中的新音视频文件，弹窗确认后自动完成语音转文字和说话人分离，全程本地运行，零云端费用。
 
 ## ✨ 功能特点
 
@@ -156,7 +156,7 @@ bash install.sh
 
 ### 使用方法
 
-**只需将视频保存到桌面或下载文件夹**，系统会自动弹窗提示：
+**只需将音频或视频保存到桌面或下载文件夹**，系统会自动弹窗提示：
 
 1. 📋 **确认** — 点击「转录」开始，或「跳过」忽略
 2. ⏳ **进度** — 通知中心分 4 个阶段显示进度（提取音频 → 检测语言 → 转录 → 保存）

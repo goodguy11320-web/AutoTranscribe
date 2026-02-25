@@ -17,11 +17,18 @@ WATCH_DIRS = [
     Path.home() / "Downloads",
 ]
 
-# ── 视频扩展名 ────────────────────────────────────────────
+# ── 可处理扩展名 ──────────────────────────────────────────
 VIDEO_EXTENSIONS = {
     ".mp4", ".mkv", ".avi", ".mov", ".webm",
     ".flv", ".m4v", ".wmv", ".ts", ".mpg", ".mpeg",
 }
+
+AUDIO_EXTENSIONS = {
+    ".mp3", ".wav", ".m4a", ".flac", ".aac",
+    ".ogg", ".opus", ".wma", ".aiff", ".aif",
+}
+
+MEDIA_EXTENSIONS = VIDEO_EXTENSIONS | AUDIO_EXTENSIONS
 
 # ── 转录参数 ────────────────────────────────────────────
 MIN_SPEAKERS = 2

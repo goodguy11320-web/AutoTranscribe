@@ -1,5 +1,5 @@
 """
-FSEvents 文件监控 — 检测 Desktop/Downloads 的新视频文件。
+FSEvents 文件监控 — 检测 Desktop/Downloads 的新音视频文件。
 
 使用 macOS 原生 FSEvents API，待机 CPU 占用近零。
 """
@@ -15,7 +15,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent, FileMovedEvent
 
 from config import (
-    WATCH_DIRS, VIDEO_EXTENSIONS,
+    WATCH_DIRS, MEDIA_EXTENSIONS,
     FILE_STABLE_CHECK_INTERVAL, FILE_STABLE_MAX_WAIT,
 )
 from file_manager import is_processed, mark_processed
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class VideoHandler(FileSystemEventHandler):
-    """检测新视频文件并触发回调。"""
+    """检测新音视频文件并触发回调。"""
 
     def __init__(self, on_new_video: Callable[[Path], None]):
         super().__init__()
@@ -32,13 +32,13 @@ class VideoHandler(FileSystemEventHandler):
         self._processing_lock = threading.Lock()
         self._currently_processing: set[str] = set()
 
-    def _is_video(self, path: str) -> bool:
-        """检查文件扩展名是否为视频。"""
-        return Path(path).suffix.lower() in VIDEO_EXTENSIONS
+    def _is_media(self, path: str) -> bool:
+        """检查文件扩展名是否为可处理的音视频格式。"""
+        return Path(path).suffix.lower() in MEDIA_EXTENSIONS
 
     def _handle_file(self, filepath: str) -> None:
         """处理单个文件事件。"""
-        if not self._is_video(filepath):
+        if not self._is_media(filepath):
             return
 
         path = Path(filepath)
@@ -82,7 +82,7 @@ class VideoHandler(FileSystemEventHandler):
                 logger.warning(f"文件写入超时或消失: {path.name}")
                 return
 
-            logger.info(f"检测到新视频: {path.name} ({path.stat().st_size / 1024 / 1024:.1f} MB)")
+            logger.info(f"检测到新音视频文件: {path.name} ({path.stat().st_size / 1024 / 1024:.1f} MB)")
             self.on_new_video(path)
 
         finally:

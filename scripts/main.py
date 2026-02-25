@@ -2,7 +2,7 @@
 """
 自动转录系统 — 入口脚本。
 
-启动 FSEvents 文件监控，检测到新视频后弹窗确认、转录、保存 Markdown。
+启动 FSEvents 文件监控，检测到新音视频文件后弹窗确认、转录、保存 Markdown。
 """
 
 import logging
@@ -104,7 +104,7 @@ def _run_transcribe_with_progress(
 
 
 def process_video(video_path: Path) -> None:
-    """处理单个视频的核心流程（由 worker 线程调用）。"""
+    """处理单个音视频文件的核心流程（由 worker 线程调用）。"""
     filename = video_path.name
     filesize_mb = video_path.stat().st_size / 1024 / 1024
 
@@ -171,7 +171,7 @@ def process_video(video_path: Path) -> None:
         progress.update("save", f"正在保存 Markdown...")
         notify_stage(filename, "4/4 保存文件...")
 
-        # 生成标准名称 (使用视频创建时间)
+        # 生成标准名称 (使用输入文件创建时间)
         try:
             # macOS 上 st_birthtime 为创建时间
             stat = video_path.stat()
@@ -188,9 +188,9 @@ def process_video(video_path: Path) -> None:
         md_path = save_transcript_md(standard_name, lang, duration, segments)
         logger.info(f"✅ Markdown: {md_path}")
 
-        # 移动视频
+        # 移动原始输入文件
         new_video_path = move_video(video_path, standard_name, success=True)
-        logger.info(f"✅ 视频: {new_video_path}")
+        logger.info(f"✅ 原文件: {new_video_path}")
 
         # 统计说话人
         speakers = set()
@@ -234,13 +234,13 @@ def process_video(video_path: Path) -> None:
         progress.set_error(error_msg)
         progress.finish(success=False)
 
-        # 尝试移动视频并标记为失败
+        # 尝试移动原始输入文件并标记为失败
         try:
             if standard_name is None:
                 standard_name = generate_standard_name("unknown")
             move_video(video_path, standard_name, success=False)
         except Exception as move_err:
-            logger.error(f"移动失败视频也出错: {move_err}")
+            logger.error(f"移动失败文件也出错: {move_err}")
 
         # 弹窗通知失败
         show_result_dialog(
@@ -306,7 +306,7 @@ class TaskQueue:
 task_queue = TaskQueue()
 
 def on_new_video(video_path: Path) -> None:
-    """检测到新视频时的入口（Watcher 回调）。"""
+    """检测到新音视频文件时的入口（Watcher 回调）。"""
     filename = video_path.name
     filesize_mb = video_path.stat().st_size / 1024 / 1024
 
@@ -357,7 +357,7 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
 
     logger.info("")
-    logger.info("💡 将视频文件保存到 Desktop 或 Downloads 即可触发自动转录")
+    logger.info("💡 将音频或视频文件保存到 Desktop 或 Downloads 即可触发自动转录")
     logger.info("💡 按 Ctrl+C 停止服务")
     logger.info("💡 查看日志: tail -f " + str(LOG_FILE))
     logger.info("")

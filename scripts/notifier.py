@@ -38,7 +38,7 @@ def ask_confirm(filename: str, filesize_mb: float) -> bool:
     # 转义文件名中的特殊字符
     safe_name = filename.replace('"', '\\"').replace("'", "'")
     script = f'''
-        display dialog "检测到新视频文件:\\n\\n📄 {safe_name}\\n📦 大小: {filesize_mb:.1f} MB\\n\\n是否进行自动转录？" ¬
+        display dialog "检测到新音视频文件:\\n\\n📄 {safe_name}\\n📦 大小: {filesize_mb:.1f} MB\\n\\n是否进行自动转录？" ¬
             buttons {{"跳过", "转录"}} default button "转录" ¬
             with title "🎙 自动转录系统" with icon note ¬
             giving up after 60
